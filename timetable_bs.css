@@ -1,0 +1,195 @@
+:root{
+  --primary: #2563eb;
+  --primary-600: #1e40af;
+  --light: #f3f4f6;
+  --mywhite: #ffffff;
+  --text: #1f2937;
+  --card: #ffffff;
+  --muted: #6b7280;
+}
+
+/* Dark mode vars */
+body.dark {
+  --primary: #60a5fa;
+  --primary-600: #2563eb;
+  --light: #071124;        /* page background (very dark blue-gray) */
+  --mywhite: #0b1220;      /* time-cell / card darker */
+  --text: #e6eef9;         /* main text (not pure white) */
+  --muted: #98a8bf;        /* secondary text */
+  --card: #0f1724;         /* cards and panels */
+  --accent: #34d399;
+  --danger: #fb7185;
+}
+
+/* basic */
+body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial; background: var(--light); color: var(--text); margin:0; }
+
+/* left sidebar buttons */
+.btn { padding: .55rem .75rem; border-radius: 8px; border: none; cursor: pointer; font-weight:600; box-shadow: 0 6px 16px rgba(2,6,23,0.04); transition: transform .08s ease, opacity .12s, background .12s; }
+.btn:active { transform: translateY(1px); }
+.btn-ghost { background: rgba(0,0,0,0.04); }
+.btn-blue { background: var(--primary); color: var(--mywhite); }
+.btn-green { background: #10b981; color: white; }
+.btn-red { background: #fb7185; color:white; }
+.btn-indigo { background: #6366f1; color:white; }
+.btn-yellow { background: #facc15; color: #111; }
+
+/* main table */
+#timetable thead th { letter-spacing: 0.3px; }
+#timetable td, #timetable th { border-color: rgba(0,0,0,0.06); }
+.course-cell {
+  background-color: var(--card); /* default card (light mode will be white) */
+  border: 1px solid rgba(0,0,0,0.06);
+  min-height: 44px;
+  padding-top: .55rem;
+  padding-bottom: .55rem;
+  transition: background-color .12s ease, box-shadow .12s ease, border .12s ease;
+  cursor: pointer;
+  color: var(--text);
+}
+.course-cell:hover { box-shadow: 0 8px 24px rgba(2,6,23,0.05); transform: translateY(-2px); }
+
+/* placeholder text */
+.course-cell:empty::after { content: "（空）"; color: rgba(0,0,0,0.22); pointer-events: none; }
+
+/* palette */
+.palette-swatch { width:100%; height:28px; border-radius:6px; border:1px solid rgba(0,0,0,0.06); transition: transform .12s; }
+.palette-swatch:hover { transform: translateY(-3px); }
+
+/* toast */
+#tt-toast { position: fixed; right: 20px; bottom: 20px; z-index: 60; background: rgba(0,0,0,0.85); color:#fff; padding:10px 14px; border-radius:10px; opacity:0; transform: translateY(10px); transition: opacity .18s, transform .18s; }
+#tt-toast.show { opacity:1; transform: translateY(0); }
+
+/* highlight (memo save) */
+@keyframes tt-flash { 0% { box-shadow:0 0 0 0 rgba(59,130,246,0.12);} 50%{ box-shadow:0 12px 36px 8px rgba(59,130,246,0.10);} 100%{ box-shadow:0 0 0 0 rgba(59,130,246,0);} }
+.course-highlight { animation: tt-flash 900ms ease-in-out; border-radius:6px; }
+
+/* imminent */
+@keyframes tt-imminent-flash { 0% { box-shadow:0 0 0 0 rgba(239,68,68,0);} 50%{ box-shadow:0 8px 28px 8px rgba(239,68,68,0.20);} 100%{ box-shadow:0 0 0 0 rgba(239,68,68,0);} }
+.tt-imminent-flash { animation: tt-imminent-flash 900ms ease-in-out infinite; border: 2px solid rgba(239,68,68,0.9) !important; z-index:60; }
+.tt-imminent-red { border:2px solid #ef4444 !important; box-shadow: 0 6px 26px 4px rgba(239,68,68,0.28) !important; }
+
+/* clock */
+#tt-clock { position: fixed; left:12px; bottom:12px; z-index:80; background: rgba(255,255,255,0.95); padding:8px 12px; border-radius:10px; font-family: ui-monospace, Menlo, Monaco, monospace; font-weight:700; font-size:14px; color: var(--primary); box-shadow:0 10px 30px rgba(2,6,23,0.12); border:1px solid rgba(37,99,235,0.08); backdrop-filter: blur(4px); }
+
+#tt-clock.dark { color: var(--primary); }
+
+/* weekend controls - place buttons styling */
+.place-btn {
+  background: var(--mywhite);
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: .45rem .6rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight:700;
+  transition: background .12s, color .12s, transform .08s;
+}
+.place-btn:hover { background: var(--primary); color: var(--mywhite); transform: translateY(-2px); }
+.place-btn.active { background: var(--primary); color: var(--mywhite); }
+
+/* weekend panel */
+#weekendPanel { width: 240px; transition: transform .12s, opacity .12s; }
+.weekend-tab { cursor:pointer; padding:.4rem .6rem; border-radius:8px; }
+.weekend-tab.active { background: var(--primary); color: var(--mywhite); box-shadow: 0 8px 30px rgba(37,99,235,0.12); }
+
+/* small responsive */
+@media (max-width:900px) {
+  #leftSidebar, #rightSidebar { display:none; }
+  #weekendPanel { display:none !important; }
+}
+
+/* ---------- Dark-mode CSS (non-destructive to inline user colors) ---------- */
+/* apply only AFTER main rules */
+body.dark {
+  background: var(--light);
+  color: var(--text);
+}
+
+/* Replace standard white panels with dark card color, BUT DO NOT TOUCH elements where user set inline style.
+   To avoid overwriting user-chosen colors we only change elements that DON'T have inline style attribute.
+*/
+body.dark .bg-white,
+body.dark .bg-light,
+body.dark .card,
+body.dark .modal,
+body.dark #memoView > div,
+body.dark #statsModal > div {
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 6px 24px rgba(2,6,23,0.45);
+}
+
+/* course-cells: if user DID NOT set inline style (no style attr), apply card background in dark mode */
+body.dark .course-cell:not([style]) {
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(255,255,255,0.03) !important;
+}
+
+/* If a course cell has inline style (user-defined color), keep it but add subtle border/shadow for readability */
+body.dark .course-cell[style] {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  color: var(--text);
+}
+
+/* time cells: use dark time background in dark mode */
+body.dark .time-cell {
+  background-color: var(--mywhite) !important; /* in dark vars this is dark */
+  color: var(--muted);
+}
+
+/* panels and controls dark look */
+body.dark .mode-item { background: rgba(255,255,255,0.02); color: var(--muted); border: 1px solid rgba(255,255,255,0.03); }
+body.dark .mode-item.bg-done { background: var(--primary); color: var(--mywhite); }
+
+/* clock dark adjust */
+body.dark #tt-clock { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color: var(--primary); border:1px solid rgba(255,255,255,0.04); }
+
+/* toast in dark */
+body.dark #tt-toast { background: rgba(10,10,12,0.8); color: #fff; }
+
+/* ensure text classes don't remain black */
+body.dark .text-black, body.dark .text-gray-800 { color: var(--text) !important; }
+
+/* share / save indicator */
+#saveIndicator { font-size: 12px; color: var(--muted); padding-top: 6px; }
+#saveIndicator.saving { color: var(--primary); font-weight:700; }
+
+/* installBtn visible variation */
+#installBtn.visible { display: inline-block; }
+
+/* redo disabled look */
+/* ---- Fix: dark 模式不要白色模糊/毛玻璃 ---- */
+
+/* 取消時鐘在 dark 的白霧玻璃感，改用卡片色，維持圓潤陰影 */
+body.dark #tt-clock {
+  background: var(--card) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.45) !important;
+  backdrop-filter: none !important; /* 關掉毛玻璃 */
+  color: var(--primary) !important;
+}
+
+/* ghost 按鈕在 dark 用微暗底，不要看起來像白色覆蓋 */
+body.dark .btn-ghost {
+  background: rgba(255,255,255,0.06) !important;
+  color: var(--text) !important;
+}
+
+/* palette / modal / 白色卡片在 dark 全走卡片色，避免白霧 */
+body.dark .bg-white,
+body.dark #colorPicker,
+body.dark #memoView > div,
+body.dark #statsModal > div {
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  box-shadow: 0 6px 24px rgba(2,6,23,0.45) !important;
+}
+body.dark #toggleWeekendBtn {
+  background: rgba(255,255,255,0.06) !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(255,255,255,0.03) !important;
+}

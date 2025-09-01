@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>我的課表 (PWA + Dark)</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="timetable_bs.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+
+  <!-- iOS support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+</head>
+<body class="bg-light min-h-screen">
+  <div id="appWrap" class="flex gap-4 p-6">
+    <!-- LEFT SIDEBAR -->
+    <aside id="leftSidebar" class="w-56 bg-white rounded shadow p-4 flex flex-col gap-3">
+      <h2 class="text-lg font-bold">模式選擇</h2>
+      <ul id="modeList" class="flex flex-col gap-2">
+        <li data-mode="name" class="mode-item cursor-pointer p-2 rounded bg-gray-100">修改課程名稱</li>
+        <li data-mode="color" class="mode-item cursor-pointer p-2 rounded bg-gray-100">修改背景色</li>
+        <li data-mode="time" class="mode-item cursor-pointer p-2 rounded bg-gray-100">修改時間</li>
+        <li data-mode="memo" class="mode-item cursor-pointer p-2 rounded bg-gray-100">備忘錄</li>
+        <li data-mode="stats" class="mode-item cursor-pointer p-2 rounded bg-gray-100">統計面板</li>
+      </ul>
+
+      <div class="mt-2 flex flex-col gap-2">
+        <button id="addCourseBtn" class="btn btn-blue">新增課程</button>
+        <button id="undoBtn" class="btn btn-green">返回上一步</button>
+        <button id="resetBtn" class="btn btn-red">全部重新</button>
+        <button id="openStatsBtn" class="mt-2 btn btn-ghost">打開統計</button>
+
+        <div class="mt-3">
+          <button id="exportBtn" class="w-full btn btn-indigo mb-2">匯出 JSON</button>
+          <input id="importFile" type="file" accept="application/json" class="w-full text-sm" />
+        </div>
+
+        <div class="mt-2 flex gap-2">
+          <button id="enableNotify" class="flex-1 btn btn-yellow">啟用通知</button>
+          <button id="darkToggle" title="切換黑暗模式" class="btn btn-ghost">Dark</button>
+        </div>
+
+        <div class="mt-3 flex flex-col gap-2">
+          <button id="shareLinkBtn" class="btn btn-indigo">分享課表</button>
+          <div class="flex gap-2">
+            <button id="redoBtn" class="btn btn-ghost">重做</button>
+            <button id="installBtn" class="btn btn-ghost hidden">安裝 App</button>
+          </div>
+          <div id="saveIndicator" class="text-sm text-gray-500 mt-1">已儲存</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- WEEKEND PANEL -->
+    <div id="weekendPanel" class="hidden bg-white rounded shadow p-3 w-56">
+      <div class="flex gap-2 mb-3 justify-end">
+        <button data-day="sat" class="weekend-tab p-2 rounded bg-gray-100">星期六</button>
+        <button data-day="sun" class="weekend-tab p-2 rounded bg-gray-100">星期日</button>
+      </div>
+      <div id="weekendSat" class="weekend-day hidden">
+        <table class="w-full border-collapse">
+          <thead class="bg-blue-600 text-white">
+            <tr><th class="border px-3 py-2 w-40">時間</th><th class="border px-3 py-2">星期六</th></tr>
+          </thead>
+          <tbody id="weekendSatBody"></tbody>
+        </table>
+      </div>
+      <div id="weekendSun" class="weekend-day hidden">
+        <table class="w-full border-collapse">
+          <thead class="bg-blue-600 text-white">
+            <tr><th class="border px-3 py-2 w-40">時間</th><th class="border px-3 py-2">星期日</th></tr>
+          </thead>
+          <tbody id="weekendSunBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MAIN (timetable) -->
+    <main class="flex-1">
+      <div class="relative">
+        <h1 class="text-2xl font-bold text-center mb-4 text-blue-600 flex items-center justify-center gap-2">
+          <span class="text-3xl">📅</span> 我的課表
+        </h1>
+
+        <div class="overflow-x-auto bg-white rounded shadow p-3">
+          <table id="timetable" class="w-full border-collapse">
+            <thead class="bg-blue-600 text-white">
+              <tr>
+                <th class="border px-4 py-2 w-36">時間</th>
+                <th class="border px-4 py-2">星期一</th>
+                <th class="border px-4 py-2">星期二</th>
+                <th class="border px-4 py-2">星期三</th>
+                <th class="border px-4 py-2">星期四</th>
+                <th class="border px-4 py-2">星期五</th>
+              </tr>
+            </thead>
+            <tbody id="timetableBody">
+              <tr>
+                <td class="time-cell border px-4 py-2 bg-mywhite">08:00 - 09:00</td>
+                <td class="course-cell border px-4 py-2">數學</td>
+                <td class="course-cell border px-4 py-2">英文</td>
+                <td class="course-cell border px-4 py-2">自然</td>
+                <td class="course-cell border px-4 py-2">社會</td>
+                <td class="course-cell border px-4 py-2">體育</td>
+              </tr>
+              <tr>
+                <td class="time-cell border px-4 py-2 bg-mywhite">09:00 - 10:00</td>
+                <td class="course-cell border px-4 py-2">國文</td>
+                <td class="course-cell border px-4 py-2">美術</td>
+                <td class="course-cell border px-4 py-2">英文</td>
+                <td class="course-cell border px-4 py-2">數學</td>
+                <td class="course-cell border px-4 py-2">音樂</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside id="rightSidebar" class="w-56">
+      <div id="weekendControls" class="flex flex-col items-end gap-2 mb-4">
+        <button id="toggleWeekendBtn" class="px-3 py-1 rounded bg-gray-100 border">顯示假日</button>
+        <div class="flex gap-2 mt-2">
+          <button id="placeWeekendLeft" class="place-btn" title="放左側">← 左</button>
+          <button id="placeWeekendRight" class="place-btn active" title="放右側">右 →</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 調色盤 -->
+  <div id="colorPicker" class="hidden fixed z-50 p-3 bg-white rounded shadow-md border" style="width:260px;">
+    <div class="flex items-center justify-between mb-2">
+      <strong>選顏色</strong>
+      <button id="closePalette" class="text-sm px-2 py-1 bg-gray-100 rounded">關閉</button>
+    </div>
+    <div id="paletteList" class="grid grid-cols-4 gap-2 mb-2"></div>
+    <div class="flex gap-2 items-center">
+      <input id="customHex" class="border px-2 py-1 flex-1" placeholder="#rrggbb 或 color 名稱" />
+      <button id="applyCustom" class="px-3 py-1 bg-blue-600 text-white rounded">套用</button>
+    </div>
+  </div>
+
+  <!-- 統計 modal -->
+  <div id="statsModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-40">
+    <div class="bg-white w-full md:w-3/4 p-4 rounded-t-lg max-h-[60vh] overflow-auto">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-lg font-bold">課堂統計</h3>
+        <button id="closeStats" class="px-2 py-1 bg-gray-100 rounded">關閉</button>
+      </div>
+
+      <div>
+        <p>總課堂數：<span id="totalCourses">0</span></p>
+        <p>不同課程數：<span id="uniqueCourses">0</span></p>
+      </div>
+
+      <div class="mt-3">
+        <table id="statsTable" class="w-full border">
+          <thead><tr><th class="border px-2 py-1">課程名稱</th><th class="border px-2 py-1">堂數</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 備忘錄 modal -->
+  <div id="memoView" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div class="bg-white p-4 rounded w-96">
+      <h3 class="font-bold mb-2">備忘錄</h3>
+      <label class="block mb-1">選擇課程</label>
+      <select id="memoCourseSelect" class="border w-full p-1 mb-2"></select>
+      <textarea id="memoText" class="border w-full p-2 h-36 mb-2" placeholder="輸入備忘錄..."></textarea>
+      <div class="flex justify-between">
+        <button id="memoSaveBtn" class="bg-blue-600 text-white px-4 py-2 rounded">保存</button>
+        <button id="memoBackBtn" class="bg-gray-500 text-white px-4 py-2 rounded">返回</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tt-toast" aria-live="polite"></div>
+  <div id="tt-clock" aria-live="polite"></div>
+
+  <script src="timetable_bs.js"></script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+     navigator.serviceWorker.register('/sw.js').then(reg => {
+        console.log('SW registered', reg);
+      }).catch(err => console.warn('SW failed', err));
+    });
+  }
+</script>
+
+</body>
+</html>
